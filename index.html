@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!--
+      Technical SEO & Performance Optimization by Gemini
+      - Document: cyber-traffic.html
+      - Objective: Enhance SEO, Performance, and Core Web Vitals without altering JS or visual layout.
+      - Date: 2024-08-05
+    -->
+
+    <!-- Basic Metadata & Charset -->
+    <meta charset="UTF-8">
+    <title>Cyber Traffic - Interactive WebGL Art</title>
+    <meta name="description" content="Immerse yourself in Cyber Traffic, a mesmerizing interactive WebGL art experience. Control the flow of a digital kaleidoscope of light and color through a real-time shader simulation.">
+    <meta name="keywords" content="webgl, interactive art, generative art, shader, digital art, creative coding, cyber traffic, pirillo's arcade, visualizer">
+    <meta name="author" content="Chris Pirillo">
+
+    <!-- Viewport for Responsive Design -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Canonical URL to prevent duplicate content issues -->
+    <link rel="canonical" href="https://pirillo.com/arcade/cyber-traffic.html">
+
+    <!--
+      Resource Hints for Performance
+      - preconnect: Establishes an early connection to third-party origins.
+      - preload: Fetches critical resources earlier in the page load process.
+    -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.tailwindcss.com">
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Gruppo&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="https://cdn.tailwindcss.com" as="script">
+    
+    <!-- Fallback for non-JS users or if preload fails -->
+    <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Gruppo&display=swap"></noscript>
+
+
+    <!-- Open Graph (OG) meta tags for social sharing (Facebook, Pinterest, etc.) -->
+    <meta property="og:title" content="Cyber Traffic - Interactive WebGL Art">
+    <meta property="og:description" content="A mesmerizing interactive WebGL art experience. Control the flow of a digital kaleidoscope of light and color.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://pirillo.com/arcade/cyber-traffic.html">
+    <meta property="og:image" content="https://pirillo.com/arcade/images/cyber-traffic.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:site_name" content="Pirillo's Arcade">
+
+    <!-- Twitter Card meta tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:site" content="@ChrisPirillo">
+    <meta name="twitter:creator" content="@ChrisPirillo">
+    <meta name="twitter:title" content="Cyber Traffic - Interactive WebGL Art">
+    <meta name="twitter:description" content="A mesmerizing interactive WebGL art experience. Control the flow of a digital kaleidoscope of light and color.">
+    <meta name="twitter:image" content="https://pirillo.com/arcade/images/cyber-traffic.png">
+
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-1CQ4D3VQ3L"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-1CQ4D3VQ3L');
+    </script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!--
+      Inlined Critical CSS
+      - This CSS is essential for the initial render and layout, preventing FOUC (Flash of Unstyled Content).
+      - It styles the core layout, canvas, and menu elements that are visible on page load.
+    -->
+    <style>
+        body {
+            font-family: 'Gruppo', sans-serif;
+            margin: 0;
+            overflow: hidden;
+            background-color: #000;
+            color: #fff;
+        }
+        canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+        }
+        #menu-toggle {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1001;
+            cursor: pointer;
+            width: 30px;
+            height: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: opacity 0.4s ease-in-out;
+            border: none; /* Reset button styles */
+            background: transparent; /* Reset button styles */
+            padding: 0; /* Reset button styles */
+        }
+        #menu-toggle.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        #menu-toggle span {
+            display: block;
+            width: 100%;
+            height: 3px;
+            background-color: #fff;
+            border-radius: 3px;
+            transition: all 0.3s ease-in-out;
+        }
+        #settings-panel {
+            position: fixed;
+            top: 0;
+            left: -350px;
+            width: 320px;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            padding-top: 60px;
+            box-shadow: 5px 0 15px rgba(0,0,0,0.5);
+            transition: left 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        #settings-panel.open {
+            left: 0;
+        }
+        #close-menu {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            cursor: pointer;
+            width: 24px;
+            height: 24px;
+            color: #fff;
+            border: none; /* Reset button styles */
+            background: transparent; /* Reset button styles */
+            padding: 0; /* Reset button styles */
+        }
+        .control-group {
+            margin-bottom: 20px;
+        }
+        .control-group h3 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+            padding-bottom: 5px;
+        }
+        label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1rem;
+            margin-bottom: 8px;
+        }
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 100%;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            outline: none;
+            cursor: pointer;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 15px;
+            height: 15px;
+            background: #fff;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 15px;
+            height: 15px;
+            background: #fff;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+    </style>
+
+    <!--
+      JSON-LD Structured Data
+      - Provides context to search engines about the page content.
+    -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": "Cyber Traffic - Interactive WebGL Art",
+      "description": "Immerse yourself in Cyber Traffic, a mesmerizing interactive WebGL art experience by Chris Pirillo. Control the flow of a digital kaleidoscope of light and color through a real-time shader simulation.",
+      "url": "https://pirillo.com/arcade/cyber-traffic.html",
+      "image": "https://pirillo.com/arcade/images/cyber-traffic.png",
+      "author": {
+        "@type": "Person",
+        "name": "Chris Pirillo",
+        "url": "https://www.chrispirillo.com/"
+      },
+      "publisher": {
+        "@type": "Person",
+        "name": "Chris Pirillo",
+        "url": "https://www.chrispirillo.com/"
+      },
+      "mainEntity": {
+        "@type": "CreativeWork",
+        "name": "Cyber Traffic",
+        "genre": "Interactive Art",
+        "about": "A real-time generative art piece using WebGL shaders."
+      }
+    }
+    </script>
+</head>
+<body>
+
+    <!--
+      Semantic HTML Structure
+      - <main>: The primary content of the page.
+      - <button>: Used for interactive controls for better accessibility.
+      - <aside>: Contains secondary, related content (the settings panel).
+    -->
+    <main>
+        <!-- Canvas for the WebGL shader. Explicit width/height helps reduce CLS, though it's controlled by CSS/JS. -->
+        <canvas id="glcanvas" width="1920" height="1080" aria-label="Interactive Cyber Traffic visualization"></canvas>
+    </main>
+
+    <!-- Hamburger menu icon, converted to a button for accessibility -->
+    <button id="menu-toggle" type="button" aria-label="Open settings panel" aria-controls="settings-panel">
+        <span></span>
+        <span></span>
+        <span></span>
+    </button>
+
+    <!-- Settings Panel, now in an <aside> tag -->
+    <aside id="settings-panel">
+        <!-- Close button, converted to a button for accessibility -->
+        <button id="close-menu" type="button" aria-label="Close settings panel">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+        </button>
+
+        <h1 class="text-3xl font-bold mb-6 text-center">Cyber Traffic</h1>
+
+        <div class="control-group">
+            <h3>Main Vector (v)</h3>
+            <label for="vx"><span>v.x</span><span id="vx-value">1.0</span></label>
+            <input type="range" id="vx" name="vx" min="0.1" max="10" step="0.1" value="1.0">
+            <label for="vy" class="mt-2"><span>v.y</span><span id="vy-value">2.0</span></label>
+            <input type="range" id="vy" name="vy" min="0.1" max="10" step="0.1" value="2.0">
+            <label for="vz" class="mt-2"><span>v.z</span><span id="vz-value">6.0</span></label>
+            <input type="range" id="vz" name="vz" min="0.1" max="10" step="0.1" value="6.0">
+        </div>
+
+        <div class="control-group">
+            <h3>Raymarching</h3>
+            <label for="iterations"><span>Iterations</span><span id="iterations-value">50</span></label>
+            <input type="range" id="iterations" name="iterations" min="10" max="150" step="1" value="50">
+        </div>
+
+        <div class="control-group">
+            <h3>Color & Contrast</h3>
+            <label for="colorFrequency"><span>Color Frequency</span><span id="colorFrequency-value">0.1</span></label>
+            <input type="range" id="colorFrequency" name="colorFrequency" min="0.01" max="1.0" step="0.01" value="0.1">
+            <label for="contrast" class="mt-2"><span>Contrast</span><span id="contrast-value">0.20</span></label>
+            <input type="range" id="contrast" name="contrast" min="0.05" max="0.45" step="0.01" value="0.2">
+        </div>
+        
+        <div class="control-group">
+            <h3>Rotation & Time</h3>
+            <label for="rotationSpeed"><span>Rotation Speed</span><span id="rotationSpeed-value">0.40</span></label>
+            <input type="range" id="rotationSpeed" name="rotationSpeed" min="0" max="2" step="0.01" value="0.4">
+            <label for="timeScale" class="mt-2"><span>Time Scale</span><span id="timeScale-value">0.20</span></label>
+            <input type="range" id="timeScale" name="timeScale" min="0.01" max="1.0" step="0.01" value="0.2">
+        </div>
+
+        <div class="control-group">
+            <h3>Geometry & Displacement</h3>
+             <label for="displacementScale"><span>Displacement</span><span id="displacementScale-value">7.0</span></label>
+            <input type="range" id="displacementScale" name="displacementScale" min="1" max="20" step="0.1" value="7.0">
+             <label for="yFactor" class="mt-2"><span>Y Factor</span><span id="yFactor-value">0.20</span></label>
+            <input type="range" id="yFactor" name="yFactor" min="0.01" max="1.0" step="0.01" value="0.2">
+             <label for="fBase" class="mt-2"><span>Falloff Base</span><span id="fBase-value">0.8</span></label>
+            <input type="range" id="fBase" name="fBase" min="0.5" max="1.0" step="0.1" value="0.8">
+        </div>
+
+        <div class="mt-8">
+            <button id="randomize-btn" type="button" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-4 rounded-lg transition-colors duration-200">
+                Randomize
+            </button>
+        </div>
+
+    </aside>
+
+    <!--
+      Shader Scripts
+      - These are not executable JavaScript but data blocks for WebGL.
+      - They are correctly placed and read by the main script.
+    -->
+    <script id="vertex-shader" type="x-shader/x-vertex">
+        attribute vec2 a_position;
+        void main() {
+            gl_Position = vec4(a_position, 0.0, 1.0);
+        }
+    </script>
+
+    <script id="fragment-shader" type="x-shader/x-fragment">
+        precision highp float;
+        uniform vec2 u_resolution;
+        uniform float u_time;
+
+        // User-controlled uniforms
+        uniform vec3 u_v;
+        uniform float u_iterations;
+        uniform float u_colorFrequency;
+        uniform float u_rotationSpeed;
+        uniform float u_timeScale;
+        uniform float u_displacementScale;
+        uniform float u_yFactor;
+        uniform float u_fBase;
+        uniform float u_contrast;
+
+        // The built-in tanh() is not available in WebGL1 (GLSL ES 1.0).
+        // We define our own to ensure compatibility.
+        float custom_tanh(float x) {
+          float ex = exp(2.0 * x);
+          return (ex - 1.0) / (ex + 1.0);
+        }
+
+        vec3 custom_tanh(vec3 x) {
+          return vec3(custom_tanh(x.r), custom_tanh(x.g), custom_tanh(x.b));
+        }
+
+        void main() {
+            vec2 r = u_resolution;
+            float t = u_time;
+            vec3 FC = gl_FragCoord.xyz;
+            vec4 o = vec4(0.0);
+
+            vec3 p, v = u_v;
+            // Declare loop variables outside the init statement for GLSL ES 1.0 compatibility
+            float z = 0.0, d = 0.0, f = 0.0;
+            
+            // GLSL ES 1.0 requires a constant integer for the loop condition.
+            // We'll loop up to a hardcoded maximum and break early based on the uniform.
+            const int MAX_ITERATIONS = 150; 
+            for(int i = 0; i < MAX_ITERATIONS; i++) {
+                if (float(i) >= u_iterations) break; // Break if we've reached the user-defined limit.
+
+                p = z * normalize(FC.rgb * 2.0 - r.xyy);
+                p.xz *= mat2(cos((p + sin(p)).y * u_rotationSpeed + vec4(0, 33, 11, 0)));
+                p.x += t / u_timeScale;
+                z += d = length(cos(p / v) * v + v.zxx / u_displacementScale) / (f = u_fBase + d / exp(p.y * u_yFactor));
+                
+                // Move color accumulation logic inside the loop body
+                o.rgb += (cos((p.x + z + v) * u_colorFrequency) + 1.0) / d / f / z;
+            }
+            // Use our custom tanh function
+            o.rgb = custom_tanh(u_contrast * o.rgb);
+            o.a = 1.0;
+            gl_FragColor = o;
+        }
+    </script>
+
+    <!--
+      Main Application Script
+      - This script is UNCHANGED as per the instructions.
+      - Its placement at the end of the <body> ensures it executes after the DOM is parsed,
+        which is a best practice for performance (non-render-blocking).
+    -->
+    <script>
+        function main() {
+            // --- Main Application Logic ---
+            const canvas = document.getElementById('glcanvas');
+            const gl = canvas.getContext('webgl');
+
+            if (!gl) {
+                console.error("WebGL not supported!");
+                document.body.innerHTML = "Sorry, your browser does not support WebGL, which is required for this page.";
+                return; // Exit if WebGL is not available.
+            }
+
+            // --- Shader Program Setup ---
+            function createShader(gl, type, source) {
+                const shader = gl.createShader(type);
+                gl.shaderSource(shader, source);
+                gl.compileShader(shader);
+                if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+                    console.error('Error compiling shader:', gl.getShaderInfoLog(shader));
+                    gl.deleteShader(shader);
+                    return null;
+                }
+                return shader;
+            }
+
+            const vertexShaderSource = document.getElementById('vertex-shader').text;
+            const fragmentShaderSource = document.getElementById('fragment-shader').text;
+
+            const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderSource);
+            const fragmentShader = createShader(gl, gl.FRAGMENT_SHADER, fragmentShaderSource);
+            
+            if (!vertexShader || !fragmentShader) {
+                return;
+            }
+
+            const program = gl.createProgram();
+            gl.attachShader(program, vertexShader);
+            gl.attachShader(program, fragmentShader);
+            gl.linkProgram(program);
+
+            if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+                console.error('Error linking program:', gl.getProgramInfoLog(program));
+            }
+
+            gl.useProgram(program);
+
+            // --- Geometry Setup (a simple plane) ---
+            const positionBuffer = gl.createBuffer();
+            gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+            const positions = [-1, -1, 1, -1, -1, 1, 1, 1];
+            gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
+
+            const positionAttributeLocation = gl.getAttribLocation(program, 'a_position');
+            gl.enableVertexAttribArray(positionAttributeLocation);
+            gl.vertexAttribPointer(positionAttributeLocation, 2, gl.FLOAT, false, 0, 0);
+
+            // --- Uniforms ---
+            const resolutionLocation = gl.getUniformLocation(program, 'u_resolution');
+            const timeLocation = gl.getUniformLocation(program, 'u_time');
+            const vLocation = gl.getUniformLocation(program, 'u_v');
+            const iterationsLocation = gl.getUniformLocation(program, 'u_iterations');
+            const colorFrequencyLocation = gl.getUniformLocation(program, 'u_colorFrequency');
+            const rotationSpeedLocation = gl.getUniformLocation(program, 'u_rotationSpeed');
+            const timeScaleLocation = gl.getUniformLocation(program, 'u_timeScale');
+            const displacementScaleLocation = gl.getUniformLocation(program, 'u_displacementScale');
+            const yFactorLocation = gl.getUniformLocation(program, 'u_yFactor');
+            const fBaseLocation = gl.getUniformLocation(program, 'u_fBase');
+            const contrastLocation = gl.getUniformLocation(program, 'u_contrast');
+
+            // --- UI Controls & State ---
+            const settings = {
+                v: { x: 1.0, y: 2.0, z: 6.0 },
+                iterations: 50,
+                colorFrequency: 0.1,
+                rotationSpeed: 0.4,
+                timeScale: 0.2,
+                displacementScale: 7.0,
+                yFactor: 0.2,
+                fBase: 0.8, // Updated default value
+                contrast: 0.2,
+            };
+
+            const inputs = {
+                vx: document.getElementById('vx'),
+                vy: document.getElementById('vy'),
+                vz: document.getElementById('vz'),
+                iterations: document.getElementById('iterations'),
+                colorFrequency: document.getElementById('colorFrequency'),
+                rotationSpeed: document.getElementById('rotationSpeed'),
+                timeScale: document.getElementById('timeScale'),
+                displacementScale: document.getElementById('displacementScale'),
+                yFactor: document.getElementById('yFactor'),
+                fBase: document.getElementById('fBase'),
+                contrast: document.getElementById('contrast'),
+            };
+
+            const valueSpans = {
+                vx: document.getElementById('vx-value'),
+                vy: document.getElementById('vy-value'),
+                vz: document.getElementById('vz-value'),
+                iterations: document.getElementById('iterations-value'),
+                colorFrequency: document.getElementById('colorFrequency-value'),
+                rotationSpeed: document.getElementById('rotationSpeed-value'),
+                timeScale: document.getElementById('timeScale-value'),
+                displacementScale: document.getElementById('displacementScale-value'),
+                yFactor: document.getElementById('yFactor-value'),
+                fBase: document.getElementById('fBase-value'),
+                contrast: document.getElementById('contrast-value'),
+            };
+
+            // Connect inputs to settings object and update labels
+            inputs.vx.addEventListener('input', e => { settings.v.x = parseFloat(e.target.value); valueSpans.vx.textContent = parseFloat(e.target.value).toFixed(1); });
+            inputs.vy.addEventListener('input', e => { settings.v.y = parseFloat(e.target.value); valueSpans.vy.textContent = parseFloat(e.target.value).toFixed(1); });
+            inputs.vz.addEventListener('input', e => { settings.v.z = parseFloat(e.target.value); valueSpans.vz.textContent = parseFloat(e.target.value).toFixed(1); });
+            inputs.iterations.addEventListener('input', e => { settings.iterations = parseFloat(e.target.value); valueSpans.iterations.textContent = e.target.value; });
+            inputs.colorFrequency.addEventListener('input', e => { settings.colorFrequency = parseFloat(e.target.value); valueSpans.colorFrequency.textContent = parseFloat(e.target.value).toFixed(2); });
+            inputs.rotationSpeed.addEventListener('input', e => { settings.rotationSpeed = parseFloat(e.target.value); valueSpans.rotationSpeed.textContent = parseFloat(e.target.value).toFixed(2); });
+            inputs.timeScale.addEventListener('input', e => { settings.timeScale = parseFloat(e.target.value); valueSpans.timeScale.textContent = parseFloat(e.target.value).toFixed(2); });
+            inputs.displacementScale.addEventListener('input', e => { settings.displacementScale = parseFloat(e.target.value); valueSpans.displacementScale.textContent = parseFloat(e.target.value).toFixed(1); });
+            inputs.yFactor.addEventListener('input', e => { settings.yFactor = parseFloat(e.target.value); valueSpans.yFactor.textContent = parseFloat(e.target.value).toFixed(2); });
+            inputs.fBase.addEventListener('input', e => { settings.fBase = parseFloat(e.target.value); valueSpans.fBase.textContent = parseFloat(e.target.value).toFixed(1); });
+            inputs.contrast.addEventListener('input', e => { settings.contrast = parseFloat(e.target.value); valueSpans.contrast.textContent = parseFloat(e.target.value).toFixed(2); });
+
+
+            // --- Menu Toggle Logic ---
+            const menuToggle = document.getElementById('menu-toggle');
+            const closeMenu = document.getElementById('close-menu');
+            const settingsPanel = document.getElementById('settings-panel');
+
+            menuToggle.addEventListener('click', () => {
+                settingsPanel.classList.add('open');
+                menuToggle.classList.add('hidden');
+            });
+            closeMenu.addEventListener('click', () => {
+                settingsPanel.classList.remove('open');
+                menuToggle.classList.remove('hidden');
+            });
+
+            // --- Randomize Button Logic ---
+            const randomizeBtn = document.getElementById('randomize-btn');
+
+            function randomizeSettings() {
+                for (const key in inputs) {
+                    if (Object.hasOwnProperty.call(inputs, key)) {
+                        const input = inputs[key];
+                        const min = parseFloat(input.min);
+                        const max = parseFloat(input.max);
+                        const step = parseFloat(input.step);
+
+                        // Calculate the number of possible steps from min to max
+                        const numSteps = Math.floor((max - min) / step);
+                        
+                        // Choose a random step index
+                        const randomStepIndex = Math.floor(Math.random() * (numSteps + 1));
+                        
+                        // Calculate the new value based on the random step
+                        const newValue = min + randomStepIndex * step;
+
+                        // Set the slider's value
+                        input.value = newValue;
+                        
+                        // Dispatch the 'input' event to make sure the UI label and settings object are updated
+                        input.dispatchEvent(new Event('input', { bubbles: true }));
+                    }
+                }
+            }
+
+            randomizeBtn.addEventListener('click', randomizeSettings);
+
+
+            // --- Render Loop ---
+            function render(time) {
+                time *= 0.001; // convert to seconds
+
+                // Resize canvas to match display size
+                const width = gl.canvas.clientWidth;
+                const height = gl.canvas.clientHeight;
+                if (gl.canvas.width !== width || gl.canvas.height !== height) {
+                    gl.canvas.width = width;
+                    gl.canvas.height = height;
+                    gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+                }
+
+                // Update uniforms
+                gl.uniform2f(resolutionLocation, gl.canvas.width, gl.canvas.height);
+                gl.uniform1f(timeLocation, time);
+                gl.uniform3f(vLocation, settings.v.x, settings.v.y, settings.v.z);
+                gl.uniform1f(iterationsLocation, settings.iterations);
+                gl.uniform1f(colorFrequencyLocation, settings.colorFrequency);
+                gl.uniform1f(rotationSpeedLocation, settings.rotationSpeed);
+                gl.uniform1f(timeScaleLocation, settings.timeScale);
+                gl.uniform1f(displacementScaleLocation, settings.displacementScale);
+                gl.uniform1f(yFactorLocation, settings.yFactor);
+                gl.uniform1f(fBaseLocation, settings.fBase);
+                gl.uniform1f(contrastLocation, settings.contrast);
+
+                // Draw
+                gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+
+                requestAnimationFrame(render);
+            }
+
+            requestAnimationFrame(render);
+        }
+
+        // Start the application
+        main();
+    </script>
+</body>
+</html>
